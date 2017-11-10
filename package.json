@@ -9,5 +9,8 @@
   "bugs": {
     "url": "https://github.com/ticelli/slack-router/issues"
   },
-  "homepage": "https://github.com/ticelli/slack-router#readme"
+  "homepage": "https://github.com/ticelli/slack-router#readme",
+  "dependencies": {
+    "ticelli-bot": "github:ticelli/bot"
+  }
 }
