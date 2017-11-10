@@ -1,0 +1,13 @@
+{
+  "name": "ticelli-slack-router",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ticelli/slack-router.git"
+  },
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/ticelli/slack-router/issues"
+  },
+  "homepage": "https://github.com/ticelli/slack-router#readme"
+}
