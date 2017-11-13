@@ -12,6 +12,7 @@
   "homepage": "https://github.com/ticelli/slack-router#readme",
   "dependencies": {
     "@slack/client": "^3.14.1",
+    "lodash.merge": "^4.6.0",
     "ticelli-bot": "github:ticelli/bot"
   }
 }
