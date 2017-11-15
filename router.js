@@ -49,13 +49,12 @@ module.exports = class SlackRouter extends AbstractRouter {
       contextPath.push(context['SLACK_CHANNEL']);
     }
 
-    if (user) {
-      context['SLACK_USER'] = `slackUser_${user}`;
-      contextPath.push(context['SLACK_USER']);
-    }
-
     context.path = contextPath;
     return context;
+  }
+
+  trapBadVerificationToken() {
+    return this.trap(({body}) => body.token !== this.config.verification_token);
   }
 
   trapBotEvent() {
@@ -109,6 +108,14 @@ module.exports = class SlackRouter extends AbstractRouter {
           }
         }
       }
+    )
+  }
+
+  onMessageIntentValue(name, value, ...params) {
+    return this.onMessageIntent(
+      name,
+      ({intent}) => intent[name].value === value,
+      ...params
     )
   }
 };
