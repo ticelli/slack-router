@@ -7,14 +7,16 @@ module.exports = class SlackRouter extends AbstractRouter {
     super(
       merge(
         {
-          expose_contexts: true,
+          expose_context: true,
         },
         config,
       ),
       ...params
     );
     this.slackClient = new SlackClient(this.config.access_token);
-    this.trapChallenge();
+    this
+      .trapChallenge()
+      .trapBotEvent();
   }
   async run(req, res) {
     const { chat } = this.slackClient;
@@ -23,53 +25,59 @@ module.exports = class SlackRouter extends AbstractRouter {
       this.slackClient.postBackMessage = chat.postMessage.bind(chat, channel);
     }
     Object.defineProperty(res, 'slack', { get: () => this.slackClient });
-    if (this.config.expose_contexts) {
-      Object.defineProperty(req, 'memoryContexts', { get: () => this.buildContexts(req.body)});
+    if (this.config.expose_context) {
+      Object.defineProperty(req, 'memoryContext', { get: () => this.buildContext(req.body)});
     }
     await super.run(req, res);
     if (!res.body) { res.body = '' }
   }
 
-  buildContexts({api_app_id, team_id, event: { channel, user } = {}} = {}) {
-    const contexts = {};
-    const contextPath = ['root', 'slack'];
+  buildContext({api_app_id, team_id, event: { channel, user } = {}} = {}) {
+    const context = {};
+    const contextPath = [];
 
     if (api_app_id) {
-      contexts['SLACK_APP'] = `slackApp_${api_app_id}`;
-      contextPath.push(contexts['SLACK_APP']);
+      context['SLACK_APP'] = `slackApp_${api_app_id}`;
+      contextPath.push(context['SLACK_APP']);
     }
 
     if (team_id) {
-      contexts['SLACK_TEAM'] = `slackTeam_${team_id}`;
-      contextPath.push(contexts['SLACK_TEAM']);
+      context['SLACK_TEAM'] = `slackTeam_${team_id}`;
+      contextPath.push(context['SLACK_TEAM']);
     }
 
     if (channel) {
-      contexts['SLACK_CHANNEL'] = `slackChannel_${channel}`;
-      contextPath.push(contexts['SLACK_CHANNEL']);
+      context['SLACK_CHANNEL'] = `slackChannel_${channel}`;
+      contextPath.push(context['SLACK_CHANNEL']);
     }
 
     if (user) {
-      contexts['SLACK_USER'] = `slackUser_${user}`;
-      contextPath.push(contexts['SLACK_USER']);
+      context['SLACK_USER'] = `slackUser_${user}`;
+      contextPath.push(context['SLACK_USER']);
     }
 
-    contexts.path = contextPath;
-    return contexts;
+    context.path = contextPath;
+    return context;
+  }
+
+  trapBotEvent() {
+    return this.trap(({body}) => !!(body && body.event && body.event.bot_id));
   }
 
   trapChallenge() {
-    return this.on(
+    return this.trap(
       ({body}) => !!(body && body.challenge && body.type === 'url_verification'),
-      ({body}, res) => { res.body = body.challenge; return 'end'; },
+      ({body}, res) => res.body = body.challenge,
     );
   }
+
   onEvent(...params) {
     return this.on(
       ({body}) => !!(body && body.event && body.type === 'event_callback'),
       ...params
     );
   }
+
   onMessageIntent(name, ...params) {
     return this.on(
       ({ intent }) => !!(intent[name]),
