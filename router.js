@@ -14,10 +14,8 @@ module.exports = class SlackRouter extends AbstractRouter {
       ...params
     );
     this.slackClient = new SlackClient(this.config.access_token);
-    this
-      .trapChallenge()
-      .trapBotEvent();
   }
+
   async run(req, res) {
     const { chat } = this.slackClient;
     if (req.body.event) {
@@ -83,5 +81,34 @@ module.exports = class SlackRouter extends AbstractRouter {
       ({ intent }) => !!(intent[name]),
       ...params
     );
+  }
+
+  trapMessageIntent(...params) {
+    return this.onMessageIntent(
+      ...params,
+      () => 'end',
+    );
+  }
+
+  trapChanWithoutMention() {
+    const extractUser = /<@([A-Z0-9]+)>/g;
+    return this.on(
+      ({body}) => body.event.channel.startsWith('C'),
+      ({body}) => {
+        const mentions = new Set();
+        let m;
+        do {
+          m = extractUser.exec(body.event.text);
+          if (m) {
+            mentions.add(m[1]);
+          }
+        } while (m);
+        for (const user of body.authed_users) {
+          if (!mentions.has(user)) {
+            return 'end';
+          }
+        }
+      }
+    )
   }
 };
