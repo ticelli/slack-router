@@ -27,10 +27,10 @@ module.exports = class SlackRouter extends AbstractRouter {
       Object.defineProperty(req, 'memoryContext', { get: () => this.buildContext(req.body)});
     }
     await super.run(req, res);
-    if (!res.body) { res.body = '' }
+    if (!res.body) { res.body = ''; }
   }
 
-  buildContext({api_app_id, team_id, event: { channel, user } = {}} = {}) {
+  buildContext({api_app_id, team_id, event: { channel } = {}} = {}) {
     const context = {};
     const contextPath = [];
 
@@ -75,20 +75,6 @@ module.exports = class SlackRouter extends AbstractRouter {
     );
   }
 
-  onMessageIntent(name, ...params) {
-    return this.on(
-      ({ intent }) => !!(intent[name]),
-      ...params
-    );
-  }
-
-  trapMessageIntent(...params) {
-    return this.onMessageIntent(
-      ...params,
-      () => 'end',
-    );
-  }
-
   trapChanWithoutMention() {
     const extractUser = /<@([A-Z0-9]+)>/g;
     return this.on(
@@ -111,11 +97,4 @@ module.exports = class SlackRouter extends AbstractRouter {
     )
   }
 
-  onMessageIntentValue(name, value, ...params) {
-    return this.onMessageIntent(
-      name,
-      ({intent}) => intent[name].value === value,
-      ...params
-    )
-  }
 };
