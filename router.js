@@ -78,7 +78,7 @@ module.exports = class SlackRouter extends AbstractRouter {
   trapChanWithoutMention() {
     const extractUser = /<@([A-Z0-9]+)>/g;
     return this.on(
-      ({body}) => body.event.channel.startsWith('C'),
+      ({body}) => body.event && body.event.channel && body.event.channel.startsWith('C'),
       ({body}) => {
         const mentions = new Set();
         let m;
