@@ -1,6 +1,8 @@
 const AbstractRouter = require('ticelli-bot/router');
 const { WebClient: SlackClient } = require('@slack/client');
 const merge = require('lodash.merge');
+const SlackBuilder = require('./builder');
+
 
 module.exports = class SlackRouter extends AbstractRouter {
   constructor(config, ...params) {
@@ -17,10 +19,11 @@ module.exports = class SlackRouter extends AbstractRouter {
   }
 
   async run(req, res) {
-    const { chat } = this.slackClient;
+    const { chat, reactions } = this.slackClient;
     if (req.body.event) {
-      const { channel } = req.body.event;
+      const { channel, ts: timestamp } = req.body.event;
       this.slackClient.postBackMessage = chat.postMessage.bind(chat, channel);
+      res.reactToMessage = reaction => reactions.add(reaction, {channel, timestamp});
     }
     Object.defineProperty(res, 'slack', { get: () => this.slackClient });
     if (this.config.expose_context) {
@@ -95,6 +98,12 @@ module.exports = class SlackRouter extends AbstractRouter {
         }
       }
     )
+  }
+
+  get when() {
+    const builder = new SlackBuilder(this);
+    this.onBuild(builder);
+    return builder;
   }
 
 };
