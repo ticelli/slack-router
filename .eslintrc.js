@@ -10,6 +10,8 @@ module.exports = {
     'import/prefer-default-export': 0,
     'import/no-dynamic-require': 0,
     'arrow-body-style': 0,
+    'camelcase': 0,
+    'class-methods-use-this': 0,
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-restricted-syntax': [
       'error',
