@@ -28,7 +28,9 @@ module.exports = class ChannelBuilder extends Builder {
   }
   get trimBotMention() {
     this.push(({ request: { body: { authed_users, event } } }) => {
-      event.text = event.text.replace(authed_users.map(u => `<@${u}>`), '').trim();
+      if (event && event.text) {
+        event.text = event.text.replace(authed_users.map(u => `<@${u}>`), '').trim();
+      }
     });
     return this;
   }
