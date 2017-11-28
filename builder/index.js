@@ -31,10 +31,4 @@ module.exports = class SlackBuilder extends Builder {
     this.push(async (train) => { train.setBody(body).close(); });
     return this;
   }
-
-  get when() {
-    const builder = new this.constructor(this.parent);
-    this.parent.push(builder);
-    return builder;
-  }
 };
