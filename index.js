@@ -12,12 +12,20 @@ module.exports = class SlackRouter extends AbstractRouter {
   async run(train) {
     const { chat, reactions } = this.slack;
     const { event = {} } = train.request.body;
+    const answers = [];
+    train.state.answers = answers;
     train
       .hang({
         slack: {
           validationToken: this.config.verification_token,
-          reply: chat.postMessage.bind(chat, event.channel),
-          react: emoji => reactions.add(emoji, { channel: event.channel, timestamp: event.ts }),
+          reply: (...params) => {
+            answers.push('reply');
+            chat.postMessage(event.channel, ...params);
+          },
+          react: emoji => {
+            answers.push('react');
+            reactions.add(emoji, { channel: event.channel, timestamp: event.ts });
+          },
         },
       });
 

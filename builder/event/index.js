@@ -42,4 +42,8 @@ module.exports = class EventBuilder extends Builder {
     this.parent.push(builder);
     return builder;
   }
+
+  get notReplied() {
+    return this.assert(train => !train.isAnswered);
+  }
 };
