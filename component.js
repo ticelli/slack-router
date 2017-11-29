@@ -17,11 +17,18 @@ module.exports = class SlackComponentRouter extends AbstractRouter {
     const { event = {} } = train.request.body;
     train
       .hang({
+        locale: 'fr', // @todo: hardcoded
         slack: {
           validationToken: this.config.verification_token,
-          reply: chat.postMessage.bind(chat, payload.channel.id),
+          reply: (messageId, ...params) => {
+            const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
+            chat.postMessage(payload.channel.id, message, ...params);
+          },
           react: emoji => reactions.add(emoji, { channel: payload.channel.id, timestamp: event.ts }),
-          ephemeral: (text, ...options) => chat.postEphemeral(payload.channel.id, text, payload.user.id, ...options),
+          ephemeral: (messageId, ...options) => {
+            const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
+            chat.postEphemeral(payload.channel.id, message, payload.user.id, ...options);
+          },
         },
       });
 

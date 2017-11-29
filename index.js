@@ -16,11 +16,13 @@ module.exports = class SlackRouter extends AbstractRouter {
     train.state.answers = answers;
     train
       .hang({
+        locale: 'fr', // @todo: hardcoded
         slack: {
           validationToken: this.config.verification_token,
-          reply: (...params) => {
+          reply: (messageId, ...params) => {
             answers.push('reply');
-            chat.postMessage(event.channel, ...params);
+            const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
+            chat.postMessage(event.channel, message, ...params);
           },
           react: emoji => {
             answers.push('react');
