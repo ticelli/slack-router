@@ -9,6 +9,6 @@ module.exports = class ChallengeBuilder extends Builder {
     this.push((train) => {
       train.body = train.request.body.challenge;
     });
-    return this.root;
+    return this;
   }
 };
