@@ -40,8 +40,7 @@ module.exports = class SlackComponentBuilder extends Builder {
     this
       .assert(({ payload: { actions } }) => actions
         .map(action => action.name === name && (!value || action.value === value))
-        .reduce((a, b) => a || b),
-      )
+        .reduce((a, b) => a || b))
       .push((req) => {
         req.actions = (req.payload.actions || []).reduce((a, b) => {
           if (b.value) {
@@ -52,8 +51,7 @@ module.exports = class SlackComponentBuilder extends Builder {
           }
           return a;
         }, {});
-      },
-      );
+      });
 
     return this;
   }

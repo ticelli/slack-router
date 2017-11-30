@@ -24,7 +24,7 @@ module.exports = class SlackRouter extends AbstractRouter {
             const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
             chat.postMessage(event.channel, message, ...params);
           },
-          react: emoji => {
+          react: (emoji) => {
             answers.push('react');
             reactions.add(emoji, { channel: event.channel, timestamp: event.ts });
           },

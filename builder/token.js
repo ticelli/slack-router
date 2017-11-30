@@ -9,7 +9,8 @@ module.exports = class TokenBuilder extends Builder {
     this.assert(({ slack: { validationToken }, request: { body } }) => body.token !== validationToken);
     return this;
   }
-  throw(...data) {
-    return super.throw(...data).root;
+  httpAnswer(body, code) {
+    this.push(async (train) => { train.setStatus(code).setBody(body).close(); });
+    return this;
   }
 };
