@@ -2,6 +2,7 @@ const Builder = require('ticelli-bot/builder');
 const ChallengeBuilder = require('./challenge');
 const TokenBuilder = require('./token');
 const EventBuilder = require('./event/index');
+const MemoryBuilder = require('./memory');
 
 module.exports = class SlackBuilder extends Builder {
   constructor(...params) {
@@ -23,6 +24,12 @@ module.exports = class SlackBuilder extends Builder {
 
   get event() {
     const eventBuilder = new EventBuilder(this);
+    this.push(eventBuilder);
+    return eventBuilder;
+  }
+
+  get memory() {
+    const eventBuilder = new MemoryBuilder(this);
     this.push(eventBuilder);
     return eventBuilder;
   }
