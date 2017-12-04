@@ -68,4 +68,10 @@ module.exports = class SlackComponentBuilder extends Builder {
     this.push(eventBuilder);
     return eventBuilder;
   }
+  setClient() {
+    this.push((train) => {
+      this.root.setClient(train);
+    });
+    return this;
+  }
 };

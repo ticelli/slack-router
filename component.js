@@ -3,17 +3,12 @@ const SlackComponentBuilder = require('./builder/component');
 const { WebClient: SlackClient } = require('@slack/client');
 
 module.exports = class SlackComponentRouter extends AbstractRouter {
-  constructor(config) {
-    super({ expose_context: true }, config);
-    this.slack = new SlackClient(this.config.access_token);
-  }
-
   async run(train) {
     const payload = JSON.parse(train.request.body.payload);
     train.hang({
       payload,
     });
-    const { chat, reactions } = this.slack;
+    const { chat, reactions } = train.slackClient;
     const { event = {} } = train.request.body;
     train
       .hang({
@@ -32,11 +27,6 @@ module.exports = class SlackComponentRouter extends AbstractRouter {
         },
       });
 
-    if (this.config.expose_context) {
-      train.hang({
-        memoryContext: this.buildContext(payload),
-      });
-    }
     return super.run(train);
   }
 
@@ -46,21 +36,16 @@ module.exports = class SlackComponentRouter extends AbstractRouter {
     return builder;
   }
 
-  buildContext({ team: { id: team_id }, channel: { id: channel_id } }) {
-    const context = {};
-    const contextPath = [];
-
-    if (team_id) {
-      context.SLACK_TEAM = `slackTeam_${team_id}`;
-      contextPath.push(context.SLACK_TEAM);
+  async setClient(train) {
+    let accessToken = this.config.access_token;
+    if (this.config.client_id && this.config.client_secret) {
+      if (train.memory && await train.memory.get('oauth.bot.bot_access_token')) {
+        accessToken = await train.memory.get('oauth.bot.bot_access_token');
+      }
     }
-
-    if (channel_id) {
-      context.SLACK_CHANNEL = `slackChannel_${channel_id}`;
-      contextPath.push(context.SLACK_CHANNEL);
+    if (!accessToken) {
+      throw new Error('No access token found');
     }
-
-    context.path = contextPath;
-    return context;
+    train.hang({ slackClient: new SlackClient(accessToken) });
   }
 };

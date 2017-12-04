@@ -18,6 +18,8 @@
     "@slack/client": "^3.14.1",
     "lodash.merge": "^4.6.0",
     "lodash.shuffle": "^4.2.0",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
     "ticelli-bot": "github:ticelli/bot"
   },
   "devDependencies": {
