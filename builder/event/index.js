@@ -49,7 +49,7 @@ module.exports = class EventBuilder extends Builder {
 
   setClient() {
     this.push((train) => {
-      this.root.setClient(train)
+      this.root.setClient(train);
     });
     return this;
   }

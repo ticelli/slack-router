@@ -41,7 +41,7 @@ module.exports = class SlackRouter extends AbstractRouter {
       }
     }
     if (!accessToken) {
-      throw new Error ('No access token found');
+      throw new Error('No access token found');
     }
     train.hang({ slackClient: new SlackClient(accessToken) });
   }
