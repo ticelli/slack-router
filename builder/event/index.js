@@ -46,4 +46,11 @@ module.exports = class EventBuilder extends Builder {
   get notReplied() {
     return this.assert(train => !train.isAnswered);
   }
+
+  setClient() {
+    this.push((train) => {
+      this.root.setClient(train)
+    });
+    return this;
+  }
 };
