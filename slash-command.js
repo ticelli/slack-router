@@ -1,36 +1,34 @@
 const AbstractRouter = require('ticelli-bot');
-const SlackComponentBuilder = require('./builder/component');
 const { WebClient: SlackClient } = require('@slack/client');
+const SlackSlashBuilder = require('./builder/slash');
 
-module.exports = class SlackComponentRouter extends AbstractRouter {
+
+module.exports = class SlackSlashCommandRouter extends AbstractRouter {
   async run(train) {
-    const payload = JSON.parse(train.request.body.payload);
-    train.hang({
-      payload,
-    });
-    const { event = {} } = train.request.body;
+    const answers = [];
+    train.state.answers = answers;
+    const { channel_id, user_id, team_id } = train.request.body;
     train
       .hang({
         locale: 'fr', // @todo: hardcoded
         slack: {
           validationToken: this.config.verification_token,
-          reply: (messageId, ...params) => {
-            const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
-            train.slackClient.chat.postMessage(payload.channel.id, message, ...params);
-          },
-          react: emoji => train.slackClient.reactions.add(emoji, { channel: payload.channel.id, timestamp: event.ts }),
           ephemeral: (messageId, ...options) => {
+            if (!train.slackClient) {
+              throw new Error('Slack Client not defined.');
+            }
+            const { chat } = train.slackClient;
+            answers.push('ephemeral');
             const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
-            train.slackClient.chat.postEphemeral(payload.channel.id, message, payload.user.id, ...options);
+            chat.postEphemeral(channel_id, message, user_id, ...options);
           },
         },
       });
-
     return super.run(train);
   }
 
   get when() {
-    const builder = new SlackComponentBuilder(this);
+    const builder = new SlackSlashBuilder(this);
     this.push(builder);
     return builder;
   }
