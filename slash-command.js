@@ -7,10 +7,9 @@ module.exports = class SlackSlashCommandRouter extends AbstractRouter {
   async run(train) {
     const answers = [];
     train.state.answers = answers;
-    const { channel_id, user_id, team_id } = train.request.body;
+    const { channel_id, user_id } = train.request.body;
     train
       .hang({
-        locale: 'fr', // @todo: hardcoded
         slack: {
           validationToken: this.config.verification_token,
           ephemeral: (messageId, ...options) => {
@@ -19,7 +18,14 @@ module.exports = class SlackSlashCommandRouter extends AbstractRouter {
             }
             const { chat } = train.slackClient;
             answers.push('ephemeral');
-            const message = train.answerPicker ? train.answerPicker.pick(train.locale, messageId, train) : messageId;
+            let message = messageId;
+            if (train.translate) {
+              if (Array.isArray(message)) {
+                message = train.translate(...message);
+              } else {
+                message = train.translate(messageId, train);
+              }
+            }
             chat.postEphemeral(channel_id, message, user_id, ...options);
           },
         },
